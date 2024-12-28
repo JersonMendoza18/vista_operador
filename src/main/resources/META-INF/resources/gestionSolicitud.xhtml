@@ -1,0 +1,223 @@
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>GESTION DE SOLICITUDES</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <!-- Verificación de sesión -->
+        <f:metadata>
+            <f:viewAction action="#{loginControlador.verificarSesion}" />
+        </f:metadata>
+        <div class="card">
+            <h:form id="forma-solicitud">
+                <p:growl id="mensajes" showDetails="true"/>
+
+                <!-- Menú de opciones -->
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-home"
+                                    update="forma-solicitud:solicitud-tabla"
+                                    actionListener="#{gestionSolicitudControlador.cargarDatos}"/>
+                    </p:menubar>
+                </div>
+
+                <!-- Cuerpo de la app -->
+                <div>
+                    <!-- Tabla de solicitudes -->
+                    <p:dataTable value="#{gestionSolicitudControlador.solicitudesSinCompletar}"
+                                 var="solicitud"
+                                 id="solicitud-tabla"
+                                 widgetVar="solicitudTabla">
+
+                        <!-- Titulo de la tabla -->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center flex-wrap card-container blue-container">
+                                <div class="flex align-items-center justify-content-center w-20rem h-4rem bg-blue-500 font-bold text-gray-900 border-round m-2">
+                                    <h3>GESTION DE SOLICITUDES</h3>
+                                </div>
+                            </div>
+                        </f:facet>
+                        <!-- Columnas de la tabla -->
+                        <p:column headerText="ID" style="width:2px">
+                            <h:outputText value="#{solicitud.id}"/>
+                        </p:column>
+                        <p:column headerText="Medico">
+                            <p:commandButton value="#{solicitud.solicitudMedicamento.medico.nombre} #{solicitud.solicitudMedicamento.medico.apellido}"
+                                             icon="pi pi-list"
+                                             process="@this"
+                                             update=":forma-modal-medico"
+                                             oncomplete="PF('ventanaModalMedico').show()"
+                                             action="#{gestionSolicitudControlador.cargarMedico(solicitud)}"
+                                             class="ui-button-primary">
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Centro de salud">
+                            <p:commandButton value="#{solicitud.solicitudMedicamento.medico.centroSalud.nombre}"
+                                             icon="pi pi-list"
+                                             process="@this"
+                                             update=":forma-modal-centroSalud"
+                                             oncomplete="PF('ventanaModalCentroSalud').show()"
+                                             action="#{gestionSolicitudControlador.cargarCentroSalud(solicitud)}"
+                                             class="ui-button-primary">
+                            </p:commandButton>
+                        </p:column>
+                        <p:column headerText="Fecha de solicitud">
+                            <h:outputText value="#{solicitud.solicitudMedicamento.fechaSolicitud}"/>
+                        </p:column>
+                        <p:column headerText="Estado del packing">
+                            <h:outputText value="#{solicitud.solicitudMedicamento.estado}"/>
+                        </p:column>
+                        <p:column>
+                            <p:commandButton value="Actualizar" icon="pi pi-user-edit"
+                                             update=":forma-modal-actualizar"
+                                             process="@this"
+                                             action="#{gestionSolicitudControlador.cargarEntregaActualizar(solicitud)}"
+                                             oncomplete="PF('ventanaModalActualizar').show()"
+                                             class="ui-button-primary"
+                                             style="margin-right: .5rem"/>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </h:form>
+        </div>
+
+        <!-- Modal del Medico -->
+        <h:form id="forma-modal-medico">
+            <p:dialog header="Datos del Medico"
+                      widgetVar="ventanaModalMedico"
+                      showEffect="fade"
+                      hideEffect="fade"
+                      modal="true"
+                      responsive="true"
+                      width="80%"
+                      height="70%"
+                      draggable="true"
+                      closable="true">
+
+                <!-- Contenido del modal -->
+                <p:outputPanel id="medico-ventana" class="ui-fluid">
+                    <div class="card">
+                        <p:dataTable value="#{gestionSolicitudControlador.medicoDTO}" var="medico">
+                            <p:column headerText="CI">
+                                <h:outputText value="#{medico.ci}"/>
+                            </p:column>
+                            <p:column headerText="Nombres">
+                                <h:outputText value="#{medico.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Apellidos">
+                                <h:outputText value="#{medico.apellido}"/>
+                            </p:column>
+                            <p:column headerText="Especialidad">
+                                <h:outputText value="#{medico.especialidad}"/>
+                            </p:column>
+                            <p:column headerText="Telefono Contacto">
+                                <h:outputText value="#{medico.telefonoContacto}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <!-- Modal del Medico -->
+        <h:form id="forma-modal-centroSalud">
+            <p:dialog header="Datos del centro de salud"
+                      widgetVar="ventanaModalCentroSalud"
+                      showEffect="fade"
+                      hideEffect="fade"
+                      modal="true"
+                      responsive="true"
+                      width="80%"
+                      height="70%"
+                      draggable="true"
+                      closable="true">
+
+                <!-- Contenido del modal -->
+                <p:outputPanel id="centroSalud-ventana" class="ui-fluid">
+                    <div class="card">
+                        <p:dataTable value="#{gestionSolicitudControlador.centroSaludDTO}" var="centro">
+                            <p:column headerText="ID">
+                                <h:outputText value="#{centro.id}"/>
+                            </p:column>
+                            <p:column headerText="Nombre">
+                                <h:outputText value="#{centro.nombre}"/>
+                            </p:column>
+                            <p:column headerText="Ubicacion">
+                                <h:outputText value="#{centro.ubicacion}"/>
+                            </p:column>
+                            <p:column headerText="Telefono de contacto">
+                                <h:outputText value="#{centro.telefonoContacto}"/>
+                            </p:column>
+                        </p:dataTable>
+                    </div>
+                </p:outputPanel>
+            </p:dialog>
+        </h:form>
+
+        <h:form id="forma-modal-actualizar">
+            <p:dialog header="Actualizar datos de la solicitud"
+                      widgetVar="ventanaModalActualizar"
+                      showEffect="fade"
+                      hideEffect="fade"
+                      modal="true"
+                      responsive="true"
+                      closable="true">
+                <p:outputPanel class="ui-fluid">
+                    <div class="field">
+                        <h:outputLabel for="fechaHora" value="Fecha y Hora:" />
+                        <p:datePicker id="fechaHora"
+                                      value="#{gestionSolicitudControlador.entregaSolicitudDTO.fechaEntrega}"
+                                      pattern="dd/MM/yyyy HH:mm"
+                                      showTime="true" hourFormat="24"
+                                      mindate="#{gestionSolicitudControlador.fechaActual}" required="true"
+                                      requiredMessage="La fecha y hora son obligatorias."/>
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="dronSolicitud">Dron</p:outputLabel>
+                        <p:selectOneMenu id="dronSolicitud"
+                                         value="#{gestionSolicitudControlador.dronEscogido.id}"
+                                         disabled="#{gestionSolicitudControlador.entregaSolicitudDTO.dron != null}">
+                            <f:selectItem itemLabel="Elegir uno" itemValue="" />
+                            <f:selectItems value="#{gestionSolicitudControlador.dronesDisponibles}"
+                                           var="dron"
+                                           itemLabel="#{dron.modelo} - Capacidad: #{dron.capacidadCarga}kg - Rango: #{dron.rangoVuelo}km"
+                                           itemValue="#{dron.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="pilotoSolicitud">Piloto</p:outputLabel>
+                        <p:selectOneMenu id="pilotoSolicitud"
+                                         value="#{gestionSolicitudControlador.pilotoEscogido.id}"
+                                         disabled="#{gestionSolicitudControlador.entregaSolicitudDTO.piloto != null}">
+                            <f:selectItem itemLabel="Elegir uno" itemValue="" />
+                            <f:selectItems value="#{gestionSolicitudControlador.pilotosDisponibles}"
+                                           var="piloto"
+                                           itemLabel="#{piloto.nombre} #{piloto.apellido} - Nivel: #{piloto.uasPilot} - Telefono de contacto: #{piloto.telefonoContacto}"
+                                           itemValue="#{piloto.id}" />
+                        </p:selectOneMenu>
+                    </div>
+                    <div class="field">
+                        <p:outputLabel for="estadoSolicitud">Estado de la solicitud</p:outputLabel>
+                        <p:selectOneMenu id="estadoSolicitud" value="#{gestionSolicitudControlador.entregaSolicitudDTO.solicitudMedicamento.estado}"
+                                         dynamic="true">
+                            <f:selectItem itemLabel="Elegir uno" itemValue=""/>
+                            <f:selectItems value="#{gestionSolicitudControlador.estadoSolicitud}"/>
+                        </p:selectOneMenu>
+                    </div>
+                </p:outputPanel>
+                <f:facet name="footer">
+                    <p:commandButton id="btnActualizar" value="Actualizar" icon="pi pi-check"
+                                     action="#{gestionSolicitudControlador.actualizarSolicitud}"
+                                     update="forma-solicitud"
+                                     process="@form"
+                                     ajax="true" />
+                    <p:commandButton value="Cancelar" icon="pi pi-times"
+                                     onclick="PF('ventanaModalActualizar').hide();"
+                                     class="ui-button-secondary" type="button"/>
+                </f:facet>
+            </p:dialog>
+        </h:form>
+    </h:body>
+</h:html>

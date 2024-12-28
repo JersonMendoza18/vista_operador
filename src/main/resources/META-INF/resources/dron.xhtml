@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>GESTION DE DRONES</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <!-- Verificación de sesión -->
+        <f:metadata>
+            <f:viewAction action="#{loginControlador.verificarSesion}" />
+        </f:metadata>
+
+        <div class="card">
+            <h:form id="forma-dron">
+                <p:growl id="mensajes" showDetails ="true"/>
+                <!-- menu de opciones-->
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-user"
+                                    update = "forma-dron:dron-tabla"
+                                    actionListener = "#{dronControlador.cargarDatos}"/>
+                        <p:menuitem value="Nuevo dron" icon="pi pi-building"
+                                    actionListener="#{dronControlador.agregarDron()}"
+                                    update="forma-modal:dron-ventana"
+                                    oncomplete="PF('ventanaModalDron').show()"/>
+                    </p:menubar>
+                </div>
+                <!--Cuerpo de la app-->
+                <div>
+                    <!--tabla de drones-->
+                    <p:dataTable value="#{dronControlador.drones}" var="dron"
+                                 id="dron-tabla" widgetVar="dronTabla">
+                        <!--Titulo de la tabla-->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center flex-wrap card-container blue-container">
+                                <div class="flex align-items-center justify-content-center w-20rem h-4rem bg-blue-500
+                                                font-bold text-gray-900 border-round m-2">
+                                    <h3>GESTION DE DRONES</h3>
+                                </div>
+                            </div>
+                        </f:facet>
+
+                        <p:column headerText="ID" style="width: 30px;">
+                            <h:outputText value="#{dron.id}"/>
+                        </p:column>
+                        <p:column headerText="Modelo">
+                            <h:outputText value="#{dron.modelo}"/>
+                        </p:column>
+                        <p:column headerText="Capacidad de carga">
+                            <h:outputText value="#{dron.capacidadCarga}"/>
+                        </p:column>
+                        <p:column headerText="Rango de vuelo">
+                            <h:outputText value="#{dron.rangoVuelo}"/>
+                        </p:column>
+                        <p:column headerText="Estado">
+                            <h:outputText value="#{dron.estado}"/>
+                        </p:column>
+                        <!--Boton actualizar-->
+                        <p:column>
+                            <p:commandButton value="EDITAR" icon="pi pi-user-edit"
+                                             update=":forma-modal:dron-ventana"
+                                             process="@this"
+                                             oncomplete="PF('ventanaModalDron').show()"
+                                              class="ui-button-primary"
+                                             style="margin-rigth: .5rem">
+                                <f:setPropertyActionListener value="#{dron}"
+                                                             target="#{dronControlador.dronDTO}"/>
+                                <p:resetInput target=":forma-modal:dron-ventana"/>
+                            </p:commandButton>
+                        </p:column>
+                        <!--Boton Eliminar-->
+                        <p:column>
+                            <p:commandButton value="ELIMINAR" class="ui-button-danger" icon="pi pi-trash"
+                                             process="@this" oncomplete="PF('eliminarDronVentana').show()">
+                                <f:setPropertyActionListener value="#{dron}"
+                                                             target="#{dronControlador.dronDTO}"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </h:form>
+            <h:form id="forma-modal">
+                <p:dialog header="Detalle dron" showEffect="fade"
+                          modal="true" widgetVar="ventanaModalDron"
+                          responsive="true">
+                    <p:outputPanel id="dron-ventana" class="ui-fluid">
+                        <div class="field">
+                            <p:outputLabel for="modelo">Modelo</p:outputLabel>
+                            <p:inputText id="modelo"
+                                         autocomplete="off"
+                                         value="#{dronControlador.dronDTO.modelo}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="capacidadCarga">Capacidad de carga</p:outputLabel>
+                            <p:inputText id="capacidadCarga"
+                                         autocomplete="off"
+                                         type="number"
+                                         value="#{dronControlador.dronDTO.capacidadCarga}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="rangoVuelo">Rango de vuelo</p:outputLabel>
+                            <p:inputText id="rangoVuelo"
+                                         autocomplete="off"
+                                         type="number"
+                                         value="#{dronControlador.dronDTO.rangoVuelo}"
+                                         required="true"
+                                         min="0" />
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="estado">Estado del dron</p:outputLabel>
+                            <p:selectOneMenu id="estado" value="#{dronControlador.dronDTO.estado}"
+                                             dynamic="true">
+                                <f:selectItem itemLabel="Elegir uno" itemValue=""/>
+                                <f:selectItems value="#{dronControlador.estados}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </p:outputPanel>
+                    <f:facet name="footer">
+                        <p:commandButton value="Guardar" icon ="pi pi-check"
+                                         process="dron-ventana @this"
+                                         actionListener="#{dronControlador.guardarDron}"/>
+                        <p:commandButton value="Cancelar" icon="pi pi-times"
+                                         onclick="PF('ventanaModalDron').hide()"
+                                         class="ui-button-secondary" type="button"/>
+                    </f:facet>
+                </p:dialog>
+                <p:confirmDialog widgetVar="eliminarDronVentana" showEffect="fade"
+                                 width="500" message="Seguro de eliminar el dron?"
+                                 header="CONFIRMAR" severity="warn">
+                    <p:commandButton value="SI" process="@this" styleClass="ui-button-danger"
+                                     actionListener="#{dronControlador.eliminarDron}"
+                                     oncomplete="PF('eliminarDronVentana').hide()"/>
+                    <p:commandButton value="NO" styleClass="ui-button-success"
+                                     onclick="PF('eliminarDronVentana').hide()"
+                                     type="button"/>
+                </p:confirmDialog>
+            </h:form>
+        </div>
+    </h:body>
+</h:html>

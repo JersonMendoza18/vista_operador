@@ -1,0 +1,89 @@
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>GESTION DE CENTROS DE SALUD</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <!-- Verificación de sesión -->
+        <f:metadata>
+            <f:viewAction action="#{loginControlador.verificarSesion}" />
+        </f:metadata>
+        <div class="card">
+            <h:form id="forma-centroSalud">
+                <p:growl id="mensajes" showDetails="true"/>
+                <!--  menu de opciones -->
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-user" update="forma-centroSalud:centroSalud-tabla" actionListener="#{centroSaludControlador.cargarDatos}"/>
+                        <p:menuitem value="Nuevo centro de salud" icon="pi pi-building" actionListener="#{centroSaludControlador.agregarCentro()}" update="forma-modal:centroSalud-ventana" oncomplete="PF('ventanaModalCentroSalud').show()"/>
+                    </p:menubar>
+                </div>
+                <!-- Cuerpo de la app -->
+                <div>
+                    <!-- tabla de centro de salud -->
+                    <p:dataTable value="#{centroSaludControlador.centros}" var="centro" id="centroSalud-tabla" widgetVar="centroSaludTabla">
+                        <!-- Titulo de la tabla -->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center flex-wrap card-container blue-container">
+                                <div class="flex align-items-center justify-content-center w-20rem h-4rem bg-blue-500 font-bold text-gray-900 border-round m-2">
+                                    <h3>GESTION DE CENTROS DE SALUD</h3>
+                                </div>
+                            </div>
+                        </f:facet>
+                        <p:column headerText="ID">
+                            <h:outputText value="#{centro.id}"/>
+                        </p:column>
+                        <p:column headerText="Nombre">
+                            <h:outputText value="#{centro.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Ubicacion">
+                            <h:outputText value="#{centro.ubicacion}"/>
+                        </p:column>
+                        <p:column headerText="Telefono de contacto">
+                            <h:outputText value="#{centro.telefonoContacto}"/>
+                        </p:column>
+                        <!-- Boton actualizar -->
+                        <p:column>
+                            <p:commandButton value="EDITAR" icon="pi pi-user-edit" update=":forma-modal:centroSalud-ventana" process="@this" oncomplete="PF('ventanaModalCentroSalud').show()" class="ui-button-primary" style="margin-rigth: .5rem">
+                                <f:setPropertyActionListener value="#{centro}" target="#{centroSaludControlador.centroSaludDTO}"/>
+                                <p:resetInput target=":forma-modal:centroSalud-ventana"/>
+                            </p:commandButton>
+                        </p:column>
+                        <!-- Boton Eliminar -->
+                        <p:column>
+                            <p:commandButton value="ELIMINAR" class="ui-button-danger" icon="pi pi-trash" process="@this" oncomplete="PF('eliminarCentroSaludVentana').show()">
+                                <f:setPropertyActionListener value="#{centro}" target="#{centroSaludControlador.centroSaludDTO}"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </h:form>
+            <h:form id="forma-modal">
+                <p:dialog header="Detalle Centro Salud" showEffect="fade" modal="true" widgetVar="ventanaModalCentroSalud" responsive="true">
+                    <p:outputPanel id="centroSalud-ventana" class="ui-fluid">
+                        <div class="field">
+                            <p:outputLabel for="nombre">Nombre</p:outputLabel>
+                            <p:inputText id="nombre" value="#{centroSaludControlador.centroSaludDTO.nombre}" required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="ubicacion">Ubicacion</p:outputLabel>
+                            <p:inputText id="ubicacion" value="#{centroSaludControlador.centroSaludDTO.ubicacion}" required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="telefonoContacto">Telefono de contacto</p:outputLabel>
+                            <p:inputText id="telefonoContacto" value="#{centroSaludControlador.centroSaludDTO.telefonoContacto}" required="true"/>
+                        </div>
+                    </p:outputPanel>
+                    <f:facet name="footer">
+                        <p:commandButton value="Guardar" icon="pi pi-check" process="centroSalud-ventana @this" actionListener="#{centroSaludControlador.guardarCentro}"/>
+                        <p:commandButton value="Cancelar" icon="pi pi-times" onclick="PF('ventanaModalCentroSalud').hide()" class="ui-button-secondary" type="button"/>
+                    </f:facet>
+                </p:dialog>
+                <p:confirmDialog widgetVar="eliminarCentroSaludVentana"  showEffect="fade" width="500" message="Seguro de eliminar el centro?, se eliminaran todos los trabajadores asociados" header="CONFIRMAR" severity="warn">
+                    <p:commandButton  value="SI" process="@this" styleClass="ui-button-danger" actionListener="#{centroSaludControlador.eliminarCentro}" oncomplete="PF('eliminarCentroSaludVentana').hide()"/>
+                    <p:commandButton styleClass="ui-button-success" value="NO" onclick="PF('eliminarCentroSaludVentana').hide()" class="ui-button-secondary"/>
+                </p:confirmDialog>
+            </h:form>
+        </div>
+    </h:body>
+</h:html>

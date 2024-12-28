@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>GESTION DE MEDICOS</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <!-- Verificación de sesión -->
+        <f:metadata>
+            <f:viewAction action="#{loginControlador.verificarSesion}" />
+        </f:metadata>
+        <div class="card">
+            <h:form id="forma-medico">
+                <p:growl id="mensajes" showDetails ="true"/>
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-user"
+                                    update="forma-medico"
+                                    actionListener = "#{medicoControlador.cargarDatos}"/>
+                        <p:menuitem  value="Nuevo medico" icon="pi pi-user-plus"
+                                     actionListener="#{medicoControlador.agregarMedico()}"
+                                     update="forma-modal:medico-ventana"
+                                     oncomplete="PF('ventanaModalMedico').show()"/>
+                    </p:menubar>
+                </div>
+                <!--Cuerpo de la app-->
+                <div>
+                    <!--Tabla de medicos-->
+                    <p:dataTable value="#{medicoControlador.medicos}" var="medico"
+                                  id="medico-tabla" widgetVar="medicoTabla">
+                        <!--Titulo de la tabla-->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center
+                                          flex-wrap card-container blue-container">
+                                <div class="flex align-items-center justify-content-center
+                                             w-20rem h-4rem bg-blue-500 font-bold
+                                                text-gray-900 border-round m-2">
+                                    <h3>GESTION DE MEDICOS</h3>
+                                </div>
+                            </div>
+                        </f:facet>
+                        <!--Columnas de la tabla-->
+                        <p:column headerText="CI">
+                            <h:outputText value="#{medico.ci}"/>
+                        </p:column>
+                        <p:column headerText="Nombres">
+                            <h:outputText value="#{medico.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Apellidos">
+                            <h:outputText value="#{medico.apellido}"/>
+                        </p:column>
+                        <p:column headerText="Especialidad">
+                            <h:outputText value="#{medico.especialidad}"/>
+                        </p:column>
+                        <p:column headerText="Telefono Contacto">
+                            <h:outputText value="#{medico.telefonoContacto}"/>
+                        </p:column>
+                        <p:column headerText="Centro de salud">
+                            <h:outputText value="#{medico.centroSalud.nombre}"/>
+                        </p:column>
+                        <!--Boton actualizar-->
+                        <p:column>
+                            <p:commandButton value="EDITAR" icon="pi pi-user-edit"
+                                             update=":forma-modal:medico-ventana"
+                                             process="@this"
+                                             oncomplete="PF('ventanaModalMedico').show()"
+                                             class="ui-button-primary"
+                                             style="margin-rigth: .5rem">
+                                <f:setPropertyActionListener value="#{medico}"
+                                                             target="#{medicoControlador.medicoDTO}"/>
+                                <p:resetInput target=":forma-modal:medico-ventana"/>
+                            </p:commandButton>
+                        </p:column>
+                        <!--Boton Eliminar-->
+                        <p:column>
+                            <p:commandButton value="ELIMINAR" class="ui-button-danger" icon="pi pi-trash"
+                                             process="@this" oncomplete="PF('eliminarMedicoVentana').show()">
+                                <f:setPropertyActionListener value="#{medico}"
+                                                             target="#{medicoControlador.medicoDTO}"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </h:form>
+            <h:form id="forma-modal">
+                <p:dialog header="Detalle Medico" showEffect ="fade" modal="true"
+                            widgetVar="ventanaModalMedico" responsive="true">
+                    <p:outputPanel id="medico-ventana" class="ui-fluid">
+                        <div class="field">
+                            <p:outputLabel for="ci">Carnet de identida</p:outputLabel>
+                            <p:inputText id="ci" autocomplete="off"
+                                         value="#{medicoControlador.medicoDTO.ci}"
+                                            required="true"
+                                         disabled="#{not empty medicoControlador.medicoDTO.ci}"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="nombre">Nombres</p:outputLabel>
+                            <p:inputText id="nombre" autocomplete="off"
+                                         value="#{medicoControlador.medicoDTO.nombre}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="apellido">Apellidos</p:outputLabel>
+                            <p:inputText id="apellido" autocomplete="off"
+                                         value="#{medicoControlador.medicoDTO.apellido}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="especialidad">Especialidad</p:outputLabel>
+                            <p:inputText id="especialidad" autocomplete="off"
+                                         value="#{medicoControlador.medicoDTO.especialidad}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="telefonoContacto">Telefono de contacto</p:outputLabel>
+                            <p:inputText id="telefonoContacto" autocomplete="off"
+                                         value="#{medicoControlador.medicoDTO.telefonoContacto}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="nombreCentroSalud">Centro de salud</p:outputLabel>
+                            <p:selectOneMenu id="nombreCentroSalud" value="#{medicoControlador.medicoDTO.centroSalud.nombre}"
+                                             dynamic="true">
+                                <f:selectItem itemLabel="Elegir uno" itemValue=""/>
+                                <f:selectItems value="#{medicoControlador.nombresCentroSalud}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </p:outputPanel>
+                    <f:facet name="footer">
+                        <p:commandButton value="Guardar" icon ="pi pi-check"
+                                         process="medico-ventana @this"
+                                         actionListener="#{medicoControlador.guardarMedico}"/>
+                        <p:commandButton value="Cancelar" icon="pi pi-times"
+                                         onclick="PF('ventanaModalMedico').hide()"
+                                         class="ui-button-secondary" type="button"/>
+                    </f:facet>
+                </p:dialog>
+                <p:confirmDialog widgetVar="eliminarMedicoVentana" showEffect="fade"
+                                 width="500" message="Eliminar medico?" header="CONFIRMAR"
+                                 severity="warn">
+                    <p:commandButton value="SI" process="@this" styleClass="ui-button-danger"
+                                     actionListener="#{medicoControlador.eliminarMedico}"
+                                     oncomplete="PF('eliminarMedicoVentana').hide()"/>
+                    <p:commandButton value="NO" styleClass="ui-button-success"
+                                     onclick="PF('eliminarMedicoVentana').hide()"
+                                     type="button"/>
+                </p:confirmDialog>
+            </h:form>
+        </div>
+    </h:body>
+</h:html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<h:html xmlns:h="http://xmlns.jcp.org/jsf/html"
+        xmlns:f="http://xmlns.jcp.org/jsf/core"
+        xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>GESTION DE PILOTOS</title>
+        <link rel="stylesheet" href="https://unpkg.com/primeflex@latest/primeflex.css"/>
+    </h:head>
+    <h:body>
+        <!-- Verificación de sesión -->
+        <f:metadata>
+            <f:viewAction action="#{loginControlador.verificarSesion}" />
+        </f:metadata>
+        <div class="card">
+            <h:form id="forma-piloto">
+                <p:growl id="mensajes" showDetails ="true"/>
+                <!-- menu de opciones-->
+                <div class="card">
+                    <p:menubar>
+                        <p:menuitem value="Inicio" icon="pi pi-fw pi-user"
+                                    update = "forma-piloto:piloto-tabla"
+                                    actionListener = "#{pilotoControlador.cargarDatos}"/>
+                        <p:menuitem value="Nuevo piloto" icon="pi pi-building"
+                                    actionListener="#{pilotoControlador.agregarPiloto()}"
+                                    update="forma-modal:piloto-ventana"
+                                    oncomplete="PF('ventanaModalPiloto').show()"/>
+                    </p:menubar>
+                </div>
+                <!--Cuerpo de la app-->
+                <div>
+                    <!--tabla de pilotos-->
+                    <p:dataTable value="#{pilotoControlador.pilotos}" var="piloto"
+                                 id="piloto-tabla" widgetVar="pilotoTabla">
+                        <!--Titulo de la tabla-->
+                        <f:facet name="header">
+                            <div class="flex justify-content-center flex-wrap card-container blue-container">
+                                <div class="flex align-items-center justify-content-center w-20rem h-4rem bg-blue-500
+                                                font-bold text-gray-900 border-round m-2">
+                                    <h3>GESTION DE PILOTOS</h3>
+                                </div>
+                            </div>
+                        </f:facet>
+                        <p:column headerText="ID" style="width: 30px;">
+                            <h:outputText value="#{piloto.id}"/>
+                        </p:column>
+                        <p:column headerText="Nombre">
+                            <h:outputText value="#{piloto.nombre}"/>
+                        </p:column>
+                        <p:column headerText="Apellido">
+                            <h:outputText value="#{piloto.apellido}"/>
+                        </p:column>
+                        <p:column headerText="Telefono de contacto">
+                            <h:outputText value="#{piloto.telefonoContacto}"/>
+                        </p:column>
+                        <p:column headerText="UAS pilot">
+                            <h:outputText value="#{piloto.uasPilot}"/>
+                        </p:column>
+                        <p:column headerText="Estado">
+                            <h:outputText value="#{piloto.estado}"/>
+                        </p:column>
+                        <!--Boton actualizar-->
+                        <p:column>
+                            <p:commandButton value="EDITAR" icon="pi pi-user-edit"
+                                             update=":forma-modal:piloto-ventana"
+                                             process="@this"
+                                             oncomplete="PF('ventanaModalPiloto').show()"
+                                             class="ui-button-primary"
+                                             style="margin-rigth: .5rem">
+                                <f:setPropertyActionListener value="#{piloto}"
+                                                             target="#{pilotoControlador.pilotoDTO}"/>
+                                <p:resetInput target=":forma-modal:piloto-ventana"/>
+                            </p:commandButton>
+                        </p:column>
+                        <!--Boton Eliminar-->
+                        <p:column>
+                            <p:commandButton value="ELIMINAR" class="ui-button-danger" icon="pi pi-trash"
+                                             process="@this" oncomplete="PF('eliminarPilotoVentana').show()">
+                                <f:setPropertyActionListener value="#{piloto}"
+                                                             target="#{pilotoControlador.pilotoDTO}"/>
+                            </p:commandButton>
+                        </p:column>
+                    </p:dataTable>
+                </div>
+            </h:form>
+            <h:form id="forma-modal">
+                <p:dialog header="Detalle piloto" showEffect="fade"
+                          modal="true" widgetVar="ventanaModalPiloto"
+                          responsive="true">
+                    <p:outputPanel id="piloto-ventana" class="ui-fluid">
+                        <div class="field">
+                            <p:outputLabel for="nombre">Nombres</p:outputLabel>
+                            <p:inputText id="nombre"
+                                         autocomplete="off"
+                                         value="#{pilotoControlador.pilotoDTO.nombre}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="apellido">Apellidos</p:outputLabel>
+                            <p:inputText id="apellido"
+                                         autocomplete="off"
+                                         value="#{pilotoControlador.pilotoDTO.apellido}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="telefonoContacto">Telefono de contacto</p:outputLabel>
+                            <p:inputText id="telefonoContacto"
+                                         autocomplete="off"
+                                         type="number"
+                                         value="#{pilotoControlador.pilotoDTO.telefonoContacto}"
+                                         required="true"/>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="uasPilot">UAS del piloto</p:outputLabel>
+                            <p:selectOneMenu id="uasPilot" value="#{pilotoControlador.pilotoDTO.uasPilot}"
+                                             dynamic="true">
+                                <f:selectItem itemLabel="Elegir uno" itemValue=""/>
+                                <f:selectItems value="#{pilotoControlador.tiposDeUas}"/>
+                            </p:selectOneMenu>
+                        </div>
+                        <div class="field">
+                            <p:outputLabel for="estado">Estado del piloto</p:outputLabel>
+                            <p:selectOneMenu id="estado" value="#{pilotoControlador.pilotoDTO.estado}"
+                                             dynamic="true">
+                                <f:selectItem itemLabel="Elegir uno" itemValue=""/>
+                                <f:selectItems value="#{pilotoControlador.estados}"/>
+                            </p:selectOneMenu>
+                        </div>
+                    </p:outputPanel>
+                    <f:facet name="footer">
+                        <p:commandButton value="Guardar" icon ="pi pi-check"
+                                         process="piloto-ventana @this"
+                                         actionListener="#{pilotoControlador.guardarPiloto}"/>
+                        <p:commandButton value="Cancelar" icon="pi pi-times"
+                                         onclick="PF('ventanaModalPiloto').hide()"
+                                         class="ui-button-secondary" type="button"/>
+                    </f:facet>
+                </p:dialog>
+                <p:confirmDialog widgetVar="eliminarPilotoVentana" showEffect="fade"
+                                 width="500" message="Seguro de eliminar el piloto?"
+                                 header="CONFIRMAR" severity="warn">
+                    <p:commandButton value="SI" process="@this" styleClass="ui-button-danger"
+                                     actionListener="#{pilotoControlador.eliminarPiloto}"
+                                     oncomplete="PF('eliminarPilotoVentana').hide()"/>
+                    <p:commandButton value="NO" styleClass="ui-button-success"
+                                     onclick="PF('eliminarPilotoVentana').hide()"
+                                     type="button"/>
+                </p:confirmDialog>
+            </h:form>
+        </div>
+    </h:body>
+</h:html>
